@@ -1,10 +1,11 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
 const TelegramBot = require('node-telegram-bot-api')
-const User = require('./models/User')
-const Crawler = require('./models/Crawler')
 const token = process.env.TelegramToken
 const bot = new TelegramBot(token, {polling: true})
+const schedule = require('node-schedule')
+const User = require('./models/User')
+const Crawler = require('./models/Crawler')
 mongoose.connect(process.env.MongoDbUri || process.env.MongoDbUrl || 'mongodb://localhost/universityce')
 
 let sites = ['ytuce.maliayas.com']
@@ -79,27 +80,25 @@ bot.onText(/\/help/, (msg, match) => {
   bot.sendMessage(fromId, message)
 })
 
-/* MongoDb controlling new links */
-/*
-setInterval(() => {
-  console.log('Checking MongoDb for new Link')
-  let message
-  User.find({'trackSite': 'ytuce'}, (err, users) => {
+let j = schedule.scheduleJob('* * * * *', function (){
+  console.log('Checking MongoDb for new Link, every 5 minute')
+  User.find({}, (err, users) => {
     if (err) throw err
     console.log('Users: ', users)
     if (users.length !== 0) {
       Crawler.find({'status': 'new'}).sort({date: 1}).exec((err, items) => {
         if (err) throw err
         for (let item of items) {
-          message = `*Author:*\n*${item.authorName}*\n-> ${item.authorLink}\n*Title:*\n*${item.titleName}*\n-> ${item.titleLink}\n*Content:*\n${item.content}\n*CrawlingDate:* ${item.date} - *Clock:* ${item.clock}`
+          let message = `*Author:*\n*${item.authorName}*\n-> ${item.authorLink}\n*Title:*\n*${item.titleName}*\n-> ${item.titleLink}\n*Content:*\n${item.content}\n*CrawlingDate:* ${item.date} - *Clock:* ${item.clock}`
           // console.log('Created Item Message: ', message)
           for (let user of users) {
-            bot.sendMessage(user.id, message, {'parse_mode': 'Markdown'})
+            if (user.trackSite === item.site) {
+              bot.sendMessage(user.id, message, {'parse_mode': 'Markdown'})
+            }
           }
           Crawler.update({'id': item.id}, {$set: {'status': 'old'}}, {upsert: true}, () => {})
         }
       })
     }
   })
-}, 10000)
-*/
+})
