@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/UniversityCeNotification/TelegramBot#readme",
   "dependencies": {
+    "cron": "^1.2.1",
     "dotenv": "^4.0.0",
+    "moment": "^2.18.1",
     "mongoose": "^4.10.2",
     "node-telegram-bot-api": "^0.27.1"
   }
