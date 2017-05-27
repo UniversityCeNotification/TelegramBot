@@ -1,0 +1,25 @@
+{
+  "name": "telegrambot",
+  "version": "1.0.0",
+  "description": "Telegram Bot sending university computer science news.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UniversityCeNotification/TelegramBot.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/UniversityCeNotification/TelegramBot/issues"
+  },
+  "homepage": "https://github.com/UniversityCeNotification/TelegramBot#readme",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "mongoose": "^4.10.2",
+    "node-telegram-bot-api": "^0.27.1"
+  }
+}
