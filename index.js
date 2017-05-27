@@ -80,7 +80,7 @@ bot.onText(/\/help/, (msg, match) => {
   bot.sendMessage(fromId, message)
 })
 
-let j = schedule.scheduleJob('* * * * *', function (){
+let j = schedule.scheduleJob('* * * * *', function () {
   console.log('Checking MongoDb for new Link, every 5 minute')
   User.find({}, (err, users) => {
     if (err) throw err
@@ -89,8 +89,7 @@ let j = schedule.scheduleJob('* * * * *', function (){
       Crawler.find({'status': 'new'}).sort({date: 1}).exec((err, items) => {
         if (err) throw err
         for (let item of items) {
-          let message = `*Author:*\n*${item.authorName}*\n-> ${item.authorLink}\n*Title:*\n*${item.titleName}*\n-> ${item.titleLink}\n*Content:*\n${item.content}\n*CrawlingDate:* ${item.date} - *Clock:* ${item.clock}`
-          // console.log('Created Item Message: ', message)
+          let message = createMessage(item.authorName, item.authorLink, item.titleName, item.titleLink, item.content, item.date, item.clock)
           for (let user of users) {
             if (user.trackSite === item.site) {
               bot.sendMessage(user.id, message, {'parse_mode': 'Markdown'})
@@ -102,3 +101,7 @@ let j = schedule.scheduleJob('* * * * *', function (){
     }
   })
 })
+
+let createMessage = function (aName, aLink, tName, tLink, content, date, clock) {
+  return `*[Author]:*\n*${aName}*\n-> ${aLink}\n*[Title]:*\n*${tName}*\n-> ${tLink}\n*[Content]:*\n${content}\n*[CrawlingDate]:* ${date} - *[Clock]:* ${clock}`
+}
