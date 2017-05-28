@@ -11,7 +11,9 @@ mongoose.connect(process.env.MongoDbUri || process.env.MongoDbUrl || 'mongodb://
 let sites = ['ytuce.maliayas.com']
 
 console.log('[+] Nodejs Bot Program Started')
-// Matches /createuser [whatever]
+
+// TELEGRAM COMMANDS
+// When User started conversation, creating user in mongodb
 bot.onText(/\/start/, (msg, match) => {
   var fromId = msg.from.id
   console.log('[+] Runned /start command')
@@ -35,6 +37,7 @@ bot.onText(/\/start/, (msg, match) => {
   })
 })
 
+// Displaying available sites
 bot.onText(/\/listsite/, (msg, match) => {
   console.log('[+] Runned /listsites command')
   let fromId = msg.from.id
@@ -45,6 +48,7 @@ bot.onText(/\/listsite/, (msg, match) => {
   bot.sendMessage(fromId, message)
 })
 
+// User sets own site
 bot.onText(/\/setsite (.+)/, (msg, match) => {
   console.log('[+] Runned /setsite command')
   let fromId = msg.from.id
@@ -67,6 +71,7 @@ bot.onText(/\/setsite (.+)/, (msg, match) => {
   }
 })
 
+// Help message
 bot.onText(/\/help/, (msg, match) => {
   console.log('[+] Runned /help command')
   let fromId = msg.from.id
@@ -80,12 +85,15 @@ bot.onText(/\/help/, (msg, match) => {
   bot.sendMessage(fromId, message)
 })
 
+// SCHEDULER
+// Job checking MongoDb  
 let j = schedule.scheduleJob('* * * * *', function () {
   console.log('Checking MongoDb for new Link, every 5 minute')
   User.find({}, (err, users) => {
     if (err) throw err
     console.log('Users: ', users)
     if (users.length !== 0) {
+      // Get all document's status is new
       Crawler.find({'status': 'new'}).sort({date: 1}).exec((err, items) => {
         if (err) throw err
         for (let item of items) {
@@ -95,6 +103,7 @@ let j = schedule.scheduleJob('* * * * *', function () {
               bot.sendMessage(user.id, message, {'parse_mode': 'Markdown'})
             }
           }
+          // Update document's status
           Crawler.update({'id': item.id}, {$set: {'status': 'old'}}, {upsert: true}, () => {})
         }
       })
